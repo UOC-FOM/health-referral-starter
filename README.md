@@ -15,24 +15,36 @@ You will build a complete full-stack application for managing patient referrals 
 
 ## Getting Started
 
-1. Copy the environment template:
-   ```bash
-   cp docs/templates/env.example .env
-   ```
-2. Fill in your Supabase credentials in `.env`
-3. Run the database migrations:
-   ```bash
-   psql $SUPABASE_DB_URL -f database/migrations/001_initial_schema.sql
-   psql $SUPABASE_DB_URL -f database/migrations/002_indexes.sql
-   ```
-4. Start the backend:
-   ```bash
-   php -S localhost:8000 -t backend/
-   ```
-5. Start the frontend:
-   ```bash
-   cd frontend && npm install && npm run dev
-   ```
+Read the full setup guide first: **[docs/STUDENT_ONBOARDING.md](docs/STUDENT_ONBOARDING.md)**
+
+It covers prerequisites, creating your Supabase schema, configuring `.env`, running migrations, and starting the dev servers.
+
+Quick reference:
+1. Accept the Supabase invitation from your lecturer
+2. Create your schema: `CREATE SCHEMA student_yourname;` in Supabase SQL Editor
+3. `cp docs/templates/env.example .env` — fill in your credentials
+4. Run migrations against your schema
+5. `php -S localhost:8000 -t backend/` — start PHP server
+6. `cd frontend && npm install && npm run dev` — start React
+
+## Git Workflow
+
+Each module is developed on its own branch and merged via a Pull Request. **Never commit directly to `main`.**
+
+```bash
+# Start of every module
+git checkout main && git pull origin main
+git checkout -b module-01-normalisation
+
+# During work — commit often
+git add <files>
+git commit -m "feat(module-01): describe what you did"
+git push -u origin module-01-normalisation
+
+# When done — open a Pull Request on GitHub for lecturer review
+```
+
+See [docs/STUDENT_ONBOARDING.md](docs/STUDENT_ONBOARDING.md) for the full workflow.
 
 ## Module Progress
 

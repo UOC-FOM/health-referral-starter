@@ -237,35 +237,102 @@ If you see a PHP error, check that `backend/.env` is correctly configured (the b
 
 ## Module Workflow — What to Do Each Week
 
-Every module follows the same cycle:
+Every module follows the same cycle. You will work on a **dedicated branch** for each module — this is standard professional practice and part of what you are learning.
 
-```
-1. Read docs/theory/module-XX-<topic>.md   ← understand the concepts first
-2. Read docs/modules/module-XX.md          ← understand the specific tasks
-3. Open the relevant files, read the TODO comments
-4. Implement the code
-5. Test it manually (browser + psql + curl)
-6. Commit your work:
-      git add <specific files>
-      git commit -m "feat(module-01): create normalised schema"
-      git push
+### Step-by-Step
+
+**1. Start a new branch for the module**
+
+```bash
+git checkout main
+git pull origin main
+git checkout -b module-01-normalisation
 ```
 
-Your lecturer reviews your repo on GitHub — they can see all your commits, so commit often with meaningful messages.
+Name your branch `module-XX-short-description`. Always branch off the latest `main`.
+
+**2. Read the theory and task briefs**
+
+```
+docs/theory/module-01-normalisation.md   ← concepts explained
+docs/modules/module-01.md                ← specific tasks for this module
+```
+
+**3. Implement the code**
+
+Open the relevant files, read the TODO comments, and implement your solution.
+
+**4. Commit your work regularly**
+
+Don't wait until everything is done. Commit small, logical chunks as you go:
+
+```bash
+git add database/migrations/001_initial_schema.sql
+git commit -m "feat(module-01): create locations and patients tables"
+
+git add database/migrations/002_indexes.sql
+git commit -m "feat(module-01): add indexes on foreign keys and status"
+```
+
+**5. Push your branch to GitHub**
+
+```bash
+git push -u origin module-01-normalisation
+```
+
+The first push needs `-u` to link your local branch to the remote. After that, just `git push`.
+
+**6. Open a Pull Request**
+
+1. Go to your repo on GitHub
+2. You will see a banner: **"Compare & pull request"** — click it
+3. Set the base branch to `main`, title it `Module 01 — Database Normalisation`
+4. Add a short description of what you implemented
+5. Click **"Create pull request"**
+
+Your lecturer reviews your PR, leaves comments on specific lines, and approves when complete.
+
+**7. Merge when approved**
+
+Once your lecturer approves, merge the PR into `main` on GitHub. Then update your local main:
+
+```bash
+git checkout main
+git pull origin main
+```
+
+You are now ready to start the next module branch.
+
+---
+
+### Why Branches?
+
+In professional development, no one commits directly to `main`. Changes go through branches and pull requests so that:
+- Work is reviewed before it becomes part of the permanent codebase
+- Multiple features can be developed in parallel without conflict
+- Every change has a clear history and a reason
+
+This course uses the same workflow you will use on the job.
+
+---
 
 ### Commit Message Format
 
-Use this format for all commits in this course:
+Use this format for all commits:
 
 ```
-feat(module-01): short description of what you did
-fix(module-02): describe what bug you fixed
+feat(module-01): short description of what you implemented
+fix(module-02):  short description of what you fixed
+docs(module-01): short description of documentation changes
 ```
 
 Examples:
 - `feat(module-01): create normalised schema with 6 tables`
 - `feat(module-02): add PatientController with CRUD methods`
 - `fix(module-03): handle missing patient_id in referral endpoint`
+- `docs(module-01): add comments identifying NF violations`
+
+Meaningful commit messages are part of your assessment. "update files" or "fix stuff" are not acceptable.
 
 ---
 
