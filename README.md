@@ -46,14 +46,66 @@ git push -u origin module-01-normalisation
 
 See [docs/STUDENT_ONBOARDING.md](docs/STUDENT_ONBOARDING.md) for the full workflow.
 
+---
+
+## Module 02 — PHP + PDO CRUD
+
+**Concepts:** PDO, prepared statements, SQL injection prevention, CRUD, HTTP methods, JSON responses
+
+### Your Task
+
+The backend structure is already wired up — `index.php` handles CORS and routing, `config/db.php` connects to the database. Your job is to implement the **route dispatcher** and the **five CRUD methods** for the patients resource.
+
+| File | What to do |
+|------|-----------|
+| `backend/routes/api.php` | Implement URL pattern matching and dispatch to controller methods |
+| `backend/controllers/PatientController.php` | Implement `index`, `show`, `store`, `update`, `destroy` |
+
+### Never-Edit Files (given to you complete)
+- `backend/config/db.php` — PDO connection, reads your `.env`
+- `backend/index.php` — CORS headers, entry point, loads the router
+
+### Testing Your Endpoints
+
+Use curl or [Postman](https://www.postman.com) to test each endpoint:
+
+```bash
+# List all patients
+curl http://localhost:8000/api/patients
+
+# Get one patient
+curl http://localhost:8000/api/patients/1
+
+# Create a patient
+curl -X POST http://localhost:8000/api/patients \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Your Name","postalCode":"10100"}'
+
+# Update
+curl -X PUT http://localhost:8000/api/patients/1 \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Updated Name","postalCode":"20000"}'
+
+# Delete
+curl -X DELETE http://localhost:8000/api/patients/1
+```
+
+### Assessment Checklist
+- [ ] `GET /api/patients` returns array with `district` populated via JOIN
+- [ ] `POST /api/patients` without `name` returns HTTP 400
+- [ ] `GET /api/patients/999` returns HTTP 404
+- [ ] `DELETE /api/patients/999` returns HTTP 404
+- [ ] All SQL uses prepared statements (no string concatenation)
+- [ ] All responses use the `{ success, data, message }` envelope
+
 ## Module Progress
 
 Each module has a brief in `docs/modules/`. Read the brief before starting each module.
 
 | Module | Topic | Status |
 |--------|-------|--------|
-| **01** | **Database Normalisation** | **← current** |
-| 02 | PHP + PDO CRUD | — |
+| 01 | Database Normalisation | ✓ |
+| **02** | **PHP + PDO CRUD** | **← current** |
 | 03 | REST API Design | — |
 | 04 | Auth + JWT | — |
 | 05 | React Fundamentals | — |
