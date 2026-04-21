@@ -37,6 +37,13 @@ You need the following tools installed on your machine. Click each link for inst
 | Node.js 18+ | `node --version` | [nodejs.org](https://nodejs.org) or `brew install node` |
 | psql | `psql --version` | Included with `brew install postgresql` |
 
+After installing PHP via Homebrew, make sure it is in your PATH:
+```bash
+echo 'export PATH="/opt/homebrew/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+php --version   # should show PHP 8.x
+```
+
 ### Windows
 
 | Tool | Install |
@@ -171,35 +178,42 @@ If you see errors or the tables are missing, read the error message carefully an
 
 ---
 
-## Step 5 — Install Backend Dependencies
+## Step 5 — Start the PHP Backend
 
-The PHP backend uses one external library ([firebase/php-jwt](https://github.com/firebase/php-jwt)) for Module 04. Install it now with Composer:
+Run the PHP development server from the **project root** (not inside the `backend/` folder):
 
-```bash
-cd backend
-composer install
-cd ..
-```
-
-This creates a `vendor/` folder inside `backend/`. This folder is gitignored — it is generated from `composer.json` and should never be committed.
-
----
-
-## Step 6 — Start the Development Servers
-
-You need two terminal windows open simultaneously.
-
-**Terminal 1 — PHP backend (port 8000):**
 ```bash
 php -S localhost:8000 -t backend/
 ```
 
 You should see:
 ```
-PHP 8.2.x Development Server (http://localhost:8000) started
+PHP 8.x.x Development Server (http://localhost:8000) started
 ```
 
-**Terminal 2 — React frontend (port 5173):**
+Keep this terminal open. Test it is connected to your database:
+
+```bash
+curl http://localhost:8000/api/patients
+```
+
+Expected response (empty array is correct — no data yet):
+```json
+{ "success": true, "data": [], "message": "" }
+```
+
+If you see a PHP error like `Failed to open .env`, make sure:
+- Your `.env` file is in the **project root** (same folder as `README.md`)
+- You ran `php -S` from the project root, not from inside `backend/`
+
+> **Note for Module 04:** When you reach Module 04 (Auth + JWT), you will need to run `composer install` inside the `backend/` folder to install the JWT library. You do not need Composer for Modules 01–03.
+
+---
+
+## Step 6 — Start the React Frontend
+
+Open a **second terminal** (keep the PHP server running in the first):
+
 ```bash
 cd frontend
 npm install
@@ -210,28 +224,17 @@ You should see Vite start up and print a local URL. Open [http://localhost:5173]
 
 > **Why two servers?** The React app (running in your browser) talks to the PHP app (running on your machine). They are separate processes on different ports. CORS is configured to allow this — `localhost:5173` is whitelisted in the PHP backend.
 
+> **Note:** The `frontend/` folder will be set up in Module 05. If it doesn't exist yet, skip this step and come back when you reach Module 05.
+
 ---
 
 ## Step 7 — Verify Everything Works
 
-At this point:
+At this point you should have:
 - [x] Your schema exists in Supabase with 6 tables
-- [x] PHP server is running at `localhost:8000`
-- [x] React app is running at `localhost:5173`
-
-Test the PHP backend is responding:
-
-```bash
-curl http://localhost:8000/api/patients
-```
-
-You should get a JSON response (may be an empty array `[]` — that is correct, you have no data yet):
-
-```json
-{ "success": true, "data": [], "message": "" }
-```
-
-If you see a PHP error, check that `backend/.env` is correctly configured (the backend reads `.env` from the project root).
+- [x] `.env` file configured with your credentials
+- [x] PHP server running at `localhost:8000`
+- [x] `curl http://localhost:8000/api/patients` returns `{ "success": true, "data": [] }`
 
 ---
 
@@ -246,16 +249,16 @@ Every module follows the same cycle. You will work on a **dedicated branch** for
 ```bash
 git checkout main
 git pull origin main
-git checkout -b module-01-normalisation
+git checkout -b module-02-php-crud
 ```
 
 Name your branch `module-XX-short-description`. Always branch off the latest `main`.
 
-**2. Read the theory and task briefs**
+**2. Read the theory note and task brief**
 
 ```
-docs/theory/module-01-normalisation.md   ← concepts explained
-docs/modules/module-01.md                ← specific tasks for this module
+docs/theory/module-02-php-pdo.md    ← concepts explained
+docs/modules/module-02.md           ← specific tasks for this module
 ```
 
 **3. Implement the code**
@@ -267,17 +270,20 @@ Open the relevant files, read the TODO comments, and implement your solution.
 Don't wait until everything is done. Commit small, logical chunks as you go:
 
 ```bash
-git add database/migrations/001_initial_schema.sql
-git commit -m "feat(module-01): create locations and patients tables"
+git add backend/routes/api.php
+git commit -m "feat(module-02): implement route dispatcher"
 
-git add database/migrations/002_indexes.sql
-git commit -m "feat(module-01): add indexes on foreign keys and status"
+git add backend/controllers/PatientController.php
+git commit -m "feat(module-02): implement index and show methods"
+
+git add backend/controllers/PatientController.php
+git commit -m "feat(module-02): implement store, update, destroy"
 ```
 
 **5. Push your branch to GitHub**
 
 ```bash
-git push -u origin module-01-normalisation
+git push -u origin module-02-php-crud
 ```
 
 The first push needs `-u` to link your local branch to the remote. After that, just `git push`.
@@ -286,7 +292,7 @@ The first push needs `-u` to link your local branch to the remote. After that, j
 
 1. Go to your repo on GitHub
 2. You will see a banner: **"Compare & pull request"** — click it
-3. Set the base branch to `main`, title it `Module 01 — Database Normalisation`
+3. Set the base branch to `main`, title it e.g. `Module 02 — PHP + PDO CRUD`
 4. Add a short description of what you implemented
 5. Click **"Create pull request"**
 
@@ -321,18 +327,72 @@ This course uses the same workflow you will use on the job.
 Use this format for all commits:
 
 ```
-feat(module-01): short description of what you implemented
+feat(module-02): short description of what you implemented
 fix(module-02):  short description of what you fixed
 docs(module-01): short description of documentation changes
 ```
 
+| Prefix | When to use |
+|--------|------------|
+| `feat` | Adding new functionality |
+| `fix` | Fixing a bug |
+| `docs` | Updating comments or documentation |
+
 Examples:
 - `feat(module-01): create normalised schema with 6 tables`
-- `feat(module-02): add PatientController with CRUD methods`
-- `fix(module-03): handle missing patient_id in referral endpoint`
+- `feat(module-02): implement PatientController index and show`
+- `feat(module-02): implement store with RETURNING clause`
+- `fix(module-02): return 404 when rowCount is 0 on delete`
 - `docs(module-01): add comments identifying NF violations`
 
 Meaningful commit messages are part of your assessment. "update files" or "fix stuff" are not acceptable.
+
+---
+
+## Module Quick-Start Guide
+
+Use this as a reference once you know the workflow. Each module builds on the previous one.
+
+### Module 01 — Database Normalisation
+```bash
+git checkout -b module-01-normalisation
+# Read: docs/theory/module-01-normalisation.md
+# Task: database/migrations/001_initial_schema.sql + 002_indexes.sql
+psql "$DB_URL" -f database/migrations/001_initial_schema.sql
+psql "$DB_URL" -f database/migrations/002_indexes.sql
+# Verify: Supabase Table Editor → your schema → 6 tables
+```
+
+### Module 02 — PHP + PDO CRUD
+```bash
+git checkout -b module-02-php-crud
+# Read: docs/theory/module-02-php-pdo.md
+# Tasks: backend/routes/api.php + backend/controllers/PatientController.php
+php -S localhost:8000 -t backend/   # start server
+curl http://localhost:8000/api/patients  # test GET
+curl -X POST http://localhost:8000/api/patients \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Your Name","postalCode":"10100"}'  # test POST
+```
+
+### Module 03 — REST API Design *(coming soon)*
+```bash
+git checkout -b module-03-rest-api
+# Adds: DoctorController, ReferralController, nested routes
+```
+
+### Module 04 — Auth + JWT *(coming soon)*
+```bash
+git checkout -b module-04-auth
+# Run Composer first:
+cd backend && composer install && cd ..
+```
+
+### Module 05 — React Fundamentals *(coming soon)*
+```bash
+git checkout -b module-05-react
+cd frontend && npm install && npm run dev
+```
 
 ---
 
@@ -347,9 +407,18 @@ Meaningful commit messages are part of your assessment. "update files" or "fix s
 - You forgot to create the schema in Step 2, or the name doesn't match
 - Go back to Supabase SQL Editor and run `CREATE SCHEMA student_yourname;`
 
-### PHP server shows `Undefined index` or `PDO` errors
-- Your `.env` file has missing values — check all fields are filled in
-- Run `php -S localhost:8000 -t backend/` from the project root, not from inside `backend/`
+### PHP server: `Failed to open stream: .env not found`
+- Your `.env` file is missing from the project root — run `cp docs/templates/env.example .env`
+- Make sure you run `php -S localhost:8000 -t backend/` from the **project root**, not from inside `backend/`
+
+### PHP server: `PDOException: could not connect to server`
+- Your `SUPABASE_DB_PASSWORD` in `.env` is wrong — double-check with your lecturer
+- Your `SUPABASE_DB_SCHEMA` must match the schema you created (`student_yourname`)
+
+### `curl` returns `{"success":false,"data":null,"message":"Failed to create patient"}`
+- Check the PHP server terminal for the actual error message
+- Most likely: the `postal_code` you sent doesn't exist in the `locations` table
+- Insert a location first, or send `postalCode: null` (it is optional)
 
 ### React page is blank or shows `Network Error`
 - The PHP server is not running — start it in Terminal 1
@@ -357,23 +426,14 @@ Meaningful commit messages are part of your assessment. "update files" or "fix s
 
 ### `git status` shows `.env` as modified — should I commit it?
 - **No.** Never commit `.env`. It contains your database password and JWT secret.
-- If it shows as untracked, add it to `.gitignore`. If it's already tracked, run `git rm --cached .env`
+- If it is already tracked by git: `git rm --cached .env` then commit the removal
 
 ---
 
 ## Getting Help
 
-1. **Read the error message** — most errors tell you exactly what went wrong
-2. **Check the theory notes** in `docs/theory/` for the relevant module
-3. **Ask your lecturer** in the next session with a screenshot of the error and the code you wrote
-4. **Open an issue** in your GitHub repo describing the problem — your lecturer can comment directly on your code
-
----
-
-## What's Next
-
-Once your setup is complete, start with Module 01:
-
-1. Read the theory note: [docs/theory/module-01-normalisation.md](theory/module-01-normalisation.md)
-2. Open `database/seeds/broken_table.sql` — study the broken table
-3. Open `database/migrations/001_initial_schema.sql` — read the TODO comments and implement the schema
+1. **Read the error message** — most PHP and SQL errors tell you exactly what went wrong and on which line
+2. **Check the theory note** in `docs/theory/` for the current module
+3. **Check the PHP server terminal** — it logs all errors while the server is running
+4. **Ask your lecturer** in the next session with a screenshot of the error and the code you wrote
+5. **Open an issue** in your GitHub repo describing the problem — your lecturer can comment directly on your code
