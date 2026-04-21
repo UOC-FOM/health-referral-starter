@@ -238,6 +238,40 @@ At this point you should have:
 
 ---
 
+## Getting New Module Files (Upstream Sync)
+
+Each module adds new starter files to the template repository. Because GitHub Classroom gave you a snapshot of the template when you accepted the assignment, **your repo does not automatically receive these new files**. You need to pull them in manually.
+
+### Do this once — link your repo to the template
+
+```bash
+git remote add upstream https://github.com/UOC-FOM/health-referral-starter.git
+```
+
+Verify it worked:
+
+```bash
+git remote -v
+# You should see both:
+# origin    https://github.com/UOC-FOM/health-referral-<your-username>.git
+# upstream  https://github.com/UOC-FOM/health-referral-starter.git
+```
+
+### Do this at the start of every new module
+
+```bash
+git checkout main
+git fetch upstream
+git merge upstream/main
+git push origin main
+```
+
+This pulls the new scaffold files (e.g. `backend/` for Module 02) into your repo without touching your own work. There should be no merge conflicts because each module adds new files — it does not modify files from previous modules.
+
+> **What if I see a merge conflict?** It means you edited a file that the template also changed (e.g. README.md). Open the file, look for the `<<<<<<<` markers, keep the content you want, then run `git add <file> && git commit`.
+
+---
+
 ## Module Workflow — What to Do Each Week
 
 Every module follows the same cycle. You will work on a **dedicated branch** for each module — this is standard professional practice and part of what you are learning.
