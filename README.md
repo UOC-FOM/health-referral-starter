@@ -1,50 +1,98 @@
 # Health Referral System — Student Starter
+### A Real-World Full-Stack Project for the University of Colombo Faculty of Medicine
 
-This is the starter template for the **Patient Health Referral System** project, part of a 16-week full-stack web development course.
+[![Course](https://img.shields.io/badge/Course-UOC%20Faculty%20of%20Medicine-blue?style=for-the-badge)]()
+[![Stack](https://img.shields.io/badge/Stack-PHP%20%7C%20React%20%7C%20PostgreSQL-orange?style=for-the-badge)]()
+[![Companion Repo](https://img.shields.io/badge/Solution%20Repo-health--referral--solution-green?style=for-the-badge)](https://github.com/UOC-FOM/health-referral-solution)
 
-## Your Task
+---
 
-You will build a complete full-stack application for managing patient referrals in a Department of Psychiatry. Each module introduces new concepts and extends the system.
+## About This Repository
+
+This is the **student starter template** for the Patient Health Referral System — a 16-week full-stack web development course taught at the University of Colombo, Faculty of Medicine.
+
+This course uses a **hands-on, build-as-you-learn** methodology. Instead of watching tutorials, you build a real healthcare application incrementally. Each week adds a new layer to a working system — by the end, you have a complete, production-aware full-stack application.
+
+---
+
+## The Teaching Methodology
+
+Most programming courses teach concepts in isolation: one week databases, next week APIs, next week frontend. Students pass exams but can't connect the pieces.
+
+This course does the opposite:
+
+| Traditional Course | This Course |
+|-------------------|------------|
+| Concepts taught in isolation | One system, built incrementally across 16 weeks |
+| Generic tutorial exercises | Real healthcare domain with real data schemas |
+| Passive instruction | Students write code every session |
+| Final project is separate from coursework | The coursework *is* the project |
+
+**Result:** Students graduate with a complete application they built from scratch — not just knowledge of individual concepts.
+
+---
+
+## What You Will Build
+
+A complete **Patient Health Referral Management System** for a Department of Psychiatry:
+
+- Patient registration and profile management
+- Inter-department referral workflows
+- Clinician authentication and role-based access
+- Referral tracking and status updates
+- Full audit trail for clinical compliance
+
+This is a real system type used in hospitals. The domain is chosen deliberately — it exposes you to real data modelling challenges (normalisation, relationships, constraints) that generic tutorials don't.
+
+---
 
 ## Tech Stack
 
-- **Database:** PostgreSQL (Supabase)
-- **Backend:** PHP 8.2 + PDO (no framework)
-- **Frontend:** React 18 + Vite
-- **Auth:** JWT
+| Layer | Technology |
+|-------|----------|
+| **Database** | PostgreSQL (via Supabase) |
+| **Backend** | PHP 8.2 + PDO (no framework — teaches core concepts) |
+| **Frontend** | React 18 + Vite |
+| **Auth** | JWT |
+| **Architecture** | REST API + SPA |
+
+PHP without a framework is intentional. You learn what frameworks do *for* you before you depend on them.
+
+---
+
+## Course Structure
+
+```
+Module 01 — Database Design & Normalisation
+Module 02 — PHP Backend & PDO CRUD
+Module 03 — REST API Design
+Module 04 — React Frontend Setup
+Module 05 — Authentication (JWT)
+Module 06 — Referral Workflow Implementation
+... (16 modules total)
+```
+
+Each module has a corresponding branch in this repository. Your task each week: start from the scaffold, complete the challenge, then compare with the solution repository.
+
+---
 
 ## Getting Started
 
-Read the full setup guide first: **[docs/STUDENT_ONBOARDING.md](docs/STUDENT_ONBOARDING.md)**
+Read **[docs/STUDENT_ONBOARDING.md](docs/STUDENT_ONBOARDING.md)** first — it covers prerequisites, Supabase setup, and running both servers.
 
-It covers prerequisites, creating your Supabase schema, configuring `.env`, running migrations, and starting the dev servers.
-
-Quick reference:
-1. Accept the Supabase invitation from your lecturer
-2. Create your schema: `CREATE SCHEMA student_yourname;` in Supabase SQL Editor
-3. `cp docs/templates/env.example .env` — fill in your credentials
-4. Run migrations against your schema
-5. `php -S localhost:8000 -t backend/` — start PHP server
-6. `cd frontend && npm install && npm run dev` — start React
-
-## Git Workflow
-
-Each module is developed on its own branch and merged via a Pull Request. **Never commit directly to `main`.**
-
+**Quick start:**
 ```bash
-# Start of every module
-git checkout main && git pull origin main
-git checkout -b module-01-normalisation
+# 1. Accept Supabase invitation from your lecturer
+# 2. Create your schema
+CREATE SCHEMA student_yourname;
 
-# During work — commit often
-git add <files>
-git commit -m "feat(module-01): describe what you did"
-git push -u origin module-01-normalisation
+# 3. Set up environment
+cp docs/templates/env.example .env
 
-# When done — open a Pull Request on GitHub for lecturer review
+# 4. Start servers
+php -S localhost:8000 -t backend/
+cd frontend && npm install && npm run dev
 ```
-
-See [docs/STUDENT_ONBOARDING.md](docs/STUDENT_ONBOARDING.md) for the full workflow.
 
 ---
 
@@ -122,43 +170,14 @@ Each module has a brief in `docs/modules/`. Read the brief before starting each 
 
 ---
 
-## Module 01 — Database Normalisation
+## Companion Repository
 
-**Concepts:** 1NF, 2NF, 3NF, Primary Keys, Foreign Keys, Indexes
+The **[health-referral-solution](https://github.com/UOC-FOM/health-referral-solution)** repository contains the complete working implementation. Check it *after* attempting the module yourself.
 
-### The Challenge
+---
 
-Open `database/seeds/broken_table.sql`. You'll find a single denormalized table called `broken_patient_referral` that violates all three normal forms:
+## About the Lecturer
 
-| Violation | Column | Problem |
-|-----------|--------|---------|
-| **1NF** | `doctor_phones` | Stores multiple phone numbers in one cell (comma-separated) |
-| **2NF** | `doctor_name` | Depends only on `doctor_id`, not the full row |
-| **3NF** | `district` | Depends on `postal_code`, not on the patient |
+Designed and taught by **Manodhya Opallage** — Full-Stack Engineer, M.Sc. Data Science (Trent University, Canada), IEEE Published.
 
-### Your Tasks
-
-1. **Identify** the violations — write a comment above each column explaining the problem
-2. **Design** a normalized schema that fixes all three violations
-3. **Implement** your solution in `database/migrations/001_initial_schema.sql`
-4. **Add indexes** in `database/migrations/002_indexes.sql`
-5. **Verify** your schema in the Supabase dashboard (Table Editor)
-
-### Expected Schema (6 tables)
-
-```
-locations       (postal_code PK, district)
-patients        (id, name, postal_code FK → locations, created_at)
-doctors         (id, name, specialization, created_at)
-doctor_phones   (id, doctor_id FK → doctors, phone_number)
-referrals       (id, patient_id FK, doctor_id FK, referral_date, reason, status, created_at)
-users           (id, email, password_hash, role, created_at)
-```
-
-### Assessment Checklist
-- [ ] All 6 tables created with correct column types
-- [ ] All foreign keys include `ON DELETE CASCADE` (or `SET NULL` where appropriate)
-- [ ] `status` column uses a `CHECK` constraint
-- [ ] `email` column is `UNIQUE NOT NULL`
-- [ ] All 5 indexes created in `002_indexes.sql`
-- [ ] Schema verified in Supabase Table Editor
+[GitHub](https://github.com/iNVISIBLExtanx) · [LinkedIn](https://linkedin.com/in/manodhya-opallage)
