@@ -7,8 +7,8 @@ These notes accompany each module of the course. Read the theory note **before**
 | Module | Topic | File |
 |--------|-------|------|
 | 01 | Database Normalisation | [module-01-normalisation.md](module-01-normalisation.md) |
-| **02** | **PHP + PDO CRUD** | [module-02-php-pdo.md](module-02-php-pdo.md) |
-| 03 | REST API Design | [module-03-rest-api.md](module-03-rest-api.md) |
+| 02 | PHP + PDO CRUD | [module-02-php-pdo.md](module-02-php-pdo.md) |
+| **03** | **REST API Design** | [module-03-rest-api.md](module-03-rest-api.md) |
 | 04 | Authentication + JWT | [module-04-auth-jwt.md](module-04-auth-jwt.md) |
 | 05 | React Fundamentals | [module-05-react.md](module-05-react.md) |
 | 06 | API Integration | [module-06-api-integration.md](module-06-api-integration.md) |

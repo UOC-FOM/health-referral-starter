@@ -96,6 +96,80 @@ cd frontend && npm install && npm run dev
 
 ---
 
+## Module 03 — REST API Design
+
+**Concepts:** REST principles, HTTP method semantics, status codes, multi-resource routing, nested routes, transactions, JOIN queries
+
+Theory note: [docs/theory/module-03-rest-api.md](docs/theory/module-03-rest-api.md)
+
+### Your Task
+
+The patients API from Module 02 is complete. Now extend the system with doctors and referrals — two new resources with a relationship between them.
+
+| File | What to do |
+|------|-----------|
+| `backend/routes/api.php` | Add doctor and referral routes; handle the nested `/patients/{id}/referrals` route |
+| `backend/controllers/DoctorController.php` | Implement `index`, `show`, `store`, `update`, `destroy` |
+| `backend/controllers/ReferralController.php` | Implement `index`, `show`, `store`, `update`, `byPatient` |
+
+### New Endpoints
+
+```
+GET    /api/doctors
+POST   /api/doctors
+GET    /api/doctors/{id}
+PUT    /api/doctors/{id}
+DELETE /api/doctors/{id}
+
+GET    /api/referrals
+POST   /api/referrals
+GET    /api/referrals/{id}
+PUT    /api/referrals/{id}
+
+GET    /api/patients/{id}/referrals    ← nested route
+```
+
+### Expected JSON Shapes
+
+```json
+// Doctor
+{ "id": 1, "name": "Dr. Silva", "specialization": "Psychiatry",
+  "phoneNumbers": ["0771234567"], "createdAt": "..." }
+
+// Referral
+{ "id": 1, "patientId": 2, "patientName": "Alice",
+  "doctorId": 3, "doctorName": "Dr. Silva",
+  "reason": "Anxiety assessment", "status": "pending",
+  "referralDate": "2026-05-04", "createdAt": "..." }
+```
+
+### Assessment Checklist
+- [ ] All 9 new endpoints return correct HTTP status codes
+- [ ] `POST /api/doctors` without `name` returns HTTP 400
+- [ ] `POST /api/referrals` with invalid `status` returns HTTP 422
+- [ ] `GET /api/patients/999/referrals` returns HTTP 404 (patient not found)
+- [ ] Doctor response includes `phoneNumbers` array (may be empty `[]`)
+- [ ] Referral response includes `patientName` and `doctorName` (from JOIN)
+- [ ] All SQL uses prepared statements (no string concatenation)
+- [ ] All responses use the `{ success, data, message }` envelope
+
+## Module Progress
+
+Each module has a brief in `docs/modules/`. Read the brief before starting each module.
+
+| Module | Topic | Status |
+|--------|-------|--------|
+| 01 | Database Normalisation | ✓ |
+| 02 | PHP + PDO CRUD | ✓ |
+| **03** | **REST API Design** | **← current** |
+| 04 | Auth + JWT | — |
+| 05 | React Fundamentals | — |
+| 06 | API Integration | — |
+| 07 | System Integration | — |
+| 08 | Deployment + Polish | — |
+
+---
+
 ## Companion Repository
 
 The **[health-referral-solution](https://github.com/UOC-FOM/health-referral-solution)** repository contains the complete working implementation. Check it *after* attempting the module yourself.
