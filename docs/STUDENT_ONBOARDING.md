@@ -120,9 +120,9 @@ Open `.env` in your editor and fill in the values provided by your lecturer:
 SUPABASE_DB_HOST=db.ijrqtnmlfbgufuqwbjet.supabase.co
 SUPABASE_DB_PORT=5432
 SUPABASE_DB_NAME=postgres
-SUPABASE_DB_USER=postgres
-SUPABASE_DB_PASSWORD=<provided by lecturer — never share this>
-SUPABASE_DB_SCHEMA=student_yourname        # ← YOUR schema name here
+SUPABASE_DB_USER=student_yourname          # ← your individual DB role (e.g. student_amara)
+SUPABASE_DB_PASSWORD=<your individual password — provided by lecturer privately>
+SUPABASE_DB_SCHEMA=student_yourname        # ← must match your DB role name
 
 # --- Supabase API (for React frontend) ---
 VITE_SUPABASE_URL=https://ijrqtnmlfbgufuqwbjet.supabase.co
@@ -152,11 +152,13 @@ Copy the output (looks like `a3f9b2c1...`) and paste it as the value for `JWT_SE
 
 Migrations are SQL files that create and configure your database tables. You run them once to set up your schema. They must be run in numbered order.
 
-First, set your connection string as an environment variable (replace `yourpassword` and `student_yourname`):
+> **Important:** Always run migrations using `psql` from the command line as shown below. Do **not** use the Supabase SQL Editor for migrations — the SQL Editor uses a different default schema and your tables will end up in the wrong place.
+
+Set your connection string as an environment variable (replace `student_yourname` and `your_individual_password`):
 
 ```bash
-export PGPASSWORD='yourpassword'
-export DB_URL="postgresql://postgres@db.ijrqtnmlfbgufuqwbjet.supabase.co:5432/postgres?options=-c%20search_path%3Dstudent_yourname"
+export PGPASSWORD='your_individual_password'
+export DB_URL="postgresql://student_yourname@db.ijrqtnmlfbgufuqwbjet.supabase.co:5432/postgres"
 ```
 
 Then run the migrations in order:
@@ -409,10 +411,17 @@ curl -X POST http://localhost:8000/api/patients \
   -d '{"name":"Your Name","postalCode":"10100"}'  # test POST
 ```
 
-### Module 03 — REST API Design *(coming soon)*
+### Module 03 — REST API Design
 ```bash
 git checkout -b module-03-rest-api
-# Adds: DoctorController, ReferralController, nested routes
+# Read: docs/theory/module-03-rest-api.md
+# Tasks: backend/routes/api.php + DoctorController.php + ReferralController.php
+php -S localhost:8000 -t backend/   # start server
+curl http://localhost:8000/api/doctors                   # test GET doctors
+curl -X POST http://localhost:8000/api/doctors \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Dr. Silva","specialization":"Psychiatry"}' # test POST doctor
+curl http://localhost:8000/api/patients/1/referrals       # test nested route
 ```
 
 ### Module 04 — Auth + JWT *(coming soon)*
@@ -433,8 +442,8 @@ cd frontend && npm install && npm run dev
 ## Troubleshooting Common Issues
 
 ### `psql: error: connection to server failed`
-- Check the `PGPASSWORD` environment variable is set
-- Check the host and port in your connection string
+- Check the `PGPASSWORD` environment variable is set to your individual password
+- Check that `SUPABASE_DB_USER` in your connection URL matches your assigned DB role (e.g. `student_amara`)
 - Check your internet connection (Supabase is a cloud database)
 
 ### `FATAL: schema "student_yourname" does not exist`

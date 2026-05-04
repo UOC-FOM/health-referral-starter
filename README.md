@@ -48,53 +48,60 @@ See [docs/STUDENT_ONBOARDING.md](docs/STUDENT_ONBOARDING.md) for the full workfl
 
 ---
 
-## Module 02 — PHP + PDO CRUD
+## Module 03 — REST API Design
 
-**Concepts:** PDO, prepared statements, SQL injection prevention, CRUD, HTTP methods, JSON responses
+**Concepts:** REST principles, HTTP method semantics, status codes, multi-resource routing, nested routes, transactions, JOIN queries
+
+Theory note: [docs/theory/module-03-rest-api.md](docs/theory/module-03-rest-api.md)
 
 ### Your Task
 
-The backend structure is already wired up — `index.php` handles CORS and routing, `config/db.php` connects to the database. Your job is to implement the **route dispatcher** and the **five CRUD methods** for the patients resource.
+The patients API from Module 02 is complete. Now extend the system with doctors and referrals — two new resources with a relationship between them.
 
 | File | What to do |
 |------|-----------|
-| `backend/routes/api.php` | Implement URL pattern matching and dispatch to controller methods |
-| `backend/controllers/PatientController.php` | Implement `index`, `show`, `store`, `update`, `destroy` |
+| `backend/routes/api.php` | Add doctor and referral routes; handle the nested `/patients/{id}/referrals` route |
+| `backend/controllers/DoctorController.php` | Implement `index`, `show`, `store`, `update`, `destroy` |
+| `backend/controllers/ReferralController.php` | Implement `index`, `show`, `store`, `update`, `byPatient` |
 
-### Never-Edit Files (given to you complete)
-- `backend/config/db.php` — PDO connection, reads your `.env`
-- `backend/index.php` — CORS headers, entry point, loads the router
+### New Endpoints
 
-### Testing Your Endpoints
+```
+GET    /api/doctors
+POST   /api/doctors
+GET    /api/doctors/{id}
+PUT    /api/doctors/{id}
+DELETE /api/doctors/{id}
 
-Use curl or [Postman](https://www.postman.com) to test each endpoint:
+GET    /api/referrals
+POST   /api/referrals
+GET    /api/referrals/{id}
+PUT    /api/referrals/{id}
 
-```bash
-# List all patients
-curl http://localhost:8000/api/patients
+GET    /api/patients/{id}/referrals    ← nested route
+```
 
-# Get one patient
-curl http://localhost:8000/api/patients/1
+### Expected JSON Shapes
 
-# Create a patient
-curl -X POST http://localhost:8000/api/patients \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Your Name","postalCode":"10100"}'
+```json
+// Doctor
+{ "id": 1, "name": "Dr. Silva", "specialization": "Psychiatry",
+  "phoneNumbers": ["0771234567"], "createdAt": "..." }
 
-# Update
-curl -X PUT http://localhost:8000/api/patients/1 \
-  -H "Content-Type: application/json" \
-  -d '{"name":"Updated Name","postalCode":"20000"}'
-
-# Delete
-curl -X DELETE http://localhost:8000/api/patients/1
+// Referral
+{ "id": 1, "patientId": 2, "patientName": "Alice",
+  "doctorId": 3, "doctorName": "Dr. Silva",
+  "reason": "Anxiety assessment", "status": "pending",
+  "referralDate": "2026-05-04", "createdAt": "..." }
 ```
 
 ### Assessment Checklist
-- [ ] `GET /api/patients` returns array with `district` populated via JOIN
-- [ ] `POST /api/patients` without `name` returns HTTP 400
-- [ ] `GET /api/patients/999` returns HTTP 404
-- [ ] `DELETE /api/patients/999` returns HTTP 404
+- [ ] All 9 new endpoints return correct HTTP status codes
+- [ ] `POST /api/doctors` without `name` returns HTTP 400
+- [ ] `POST /api/referrals` with invalid `status` returns HTTP 422
+- [ ] `GET /api/patients/999/referrals` returns HTTP 404 (patient not found)
+- [ ] Doctor response includes `phoneNumbers` array (may be empty `[]`)
+- [ ] Referral response includes `patientName` and `doctorName` (from JOIN)
 - [ ] All SQL uses prepared statements (no string concatenation)
 - [ ] All responses use the `{ success, data, message }` envelope
 
@@ -105,8 +112,8 @@ Each module has a brief in `docs/modules/`. Read the brief before starting each 
 | Module | Topic | Status |
 |--------|-------|--------|
 | 01 | Database Normalisation | ✓ |
-| **02** | **PHP + PDO CRUD** | **← current** |
-| 03 | REST API Design | — |
+| 02 | PHP + PDO CRUD | ✓ |
+| **03** | **REST API Design** | **← current** |
 | 04 | Auth + JWT | — |
 | 05 | React Fundamentals | — |
 | 06 | API Integration | — |
