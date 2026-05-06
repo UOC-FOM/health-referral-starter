@@ -35,7 +35,6 @@ You need the following tools installed on your machine. Click each link for inst
 | PHP 8.2+ | `php --version` | `brew install php` (requires [Homebrew](https://brew.sh)) |
 | Composer | `composer --version` | [getcomposer.org](https://getcomposer.org/download/) |
 | Node.js 18+ | `node --version` | [nodejs.org](https://nodejs.org) or `brew install node` |
-| psql | `psql --version` | Included with `brew install postgresql` |
 
 After installing PHP via Homebrew, make sure it is in your PATH:
 ```bash
@@ -52,9 +51,10 @@ php --version   # should show PHP 8.x
 | PHP 8.2+ | [windows.php.net](https://windows.php.net/download/) — add to PATH |
 | Composer | [getcomposer.org](https://getcomposer.org/download/) |
 | Node.js 18+ | [nodejs.org](https://nodejs.org) |
-| psql | Included with [PostgreSQL installer](https://www.postgresql.org/download/windows/) |
 
-> **Tip:** On Windows, use [Git Bash](https://gitforwindows.org) as your terminal — it behaves like a Unix shell and all commands in this guide will work without modification.
+> **Tip:** On Windows, use [Git Bash](https://gitforwindows.org) as your terminal — it behaves like a Unix shell and most commands in this guide will work without modification.
+
+> **psql is not required.** You will run all database migrations through the Supabase web dashboard (SQL Editor). No command-line database tool is needed.
 
 ---
 
@@ -62,44 +62,27 @@ php --version   # should show PHP 8.x
 
 1. Click the assignment invitation link provided by your lecturer.
 2. Sign in with your **GitHub account** (create one free at [github.com](https://github.com) if you don't have one).
-3. GitHub Classroom will create a private repository for you under the course organisation. It will be named `health-referral-<your-github-username>`.
+3. GitHub Classroom will create a private repository for you under the course organisation. It will be named something like `module-01-database-normalisation-<your-github-username>`.
 4. You are the only student who can see your repo. Your lecturer can also see it to review your work.
 
 Clone your repo to your local machine:
 
 ```bash
-git clone https://github.com/UOC-FOM/health-referral-<your-username>.git
-cd health-referral-<your-username>
+git clone https://github.com/UOC-FOM/<your-repo-name>.git
+cd <your-repo-name>
 ```
 
 ---
 
-## Step 2 — Create Your Personal Database Schema
+## Step 2 — Create Your Supabase Project
 
-All students in this course share a single PostgreSQL database hosted on Supabase. To keep your work isolated from other students, you will work in your own **schema** — a named container inside the shared database.
+You will use your own free Supabase project as your personal database. This gives you full control — you are the database admin, you can use the web-based SQL Editor, and there are no shared-credential issues.
 
-Think of schemas like folders: all students share the same hard drive, but each has their own folder where they cannot accidentally overwrite each other's work.
+1. Go to [supabase.com](https://supabase.com) → click **Start your project** → sign up for a free account.
+2. Click **New project**. Choose any name (e.g. `health-referral`). Pick any region. Set a strong database password — **write this password down**, you will need it in Step 3.
+3. Wait about 1 minute for the project to provision. You will land on the project dashboard.
 
-### What is a Schema?
-
-In PostgreSQL, a schema is a namespace that contains tables, views, and other objects. By default everything goes into the `public` schema. You will create your own schema (e.g. `student_amara`) and run all your migrations there.
-
-### How to Create Your Schema
-
-1. Accept the Supabase invitation sent to your email by your lecturer (check your spam folder if you don't see it).
-2. Open the project dashboard: **https://supabase.com/dashboard/project/ijrqtnmlfbgufuqwbjet**
-3. Click **SQL Editor** in the left sidebar → click **New query**.
-4. Run the following, replacing `yourname` with your first name (lowercase, no spaces, no special characters):
-
-```sql
-CREATE SCHEMA student_yourname;
-```
-
-Example: if your name is Amara, run `CREATE SCHEMA student_amara;`
-
-5. Verify it worked: go to **Table Editor** → click the **Schema** dropdown at the top → you should see `student_amara` in the list.
-
-> **Note:** You have access to view all schemas in this shared project. Please work only inside your own `student_yourname` schema and do not modify or delete other students' tables.
+That's it. You are the `postgres` admin of this project.
 
 ---
 
@@ -113,22 +96,33 @@ Copy the template:
 cp docs/templates/env.example .env
 ```
 
-Open `.env` in your editor and fill in the values provided by your lecturer:
+Now fill in your values from the Supabase dashboard:
+
+**Database credentials (pooler connection):**
+1. In your Supabase project dashboard, click the **Connect** button (top of the page).
+2. Click the **Session pooler** tab.
+3. Copy the connection string. Extract the following:
+   - **Host**: `aws-0-ap-southeast-1.pooler.supabase.com` (or similar — depends on your region)
+   - **User**: `postgres.YOUR_PROJECT_REF` (the part before the `:`  in the connection string username)
+   - **Password**: the database password you set when creating the project
+
+**Supabase API keys (for Module 05+):**
+1. Go to **Project Settings** → **API**.
+2. Copy the **Project URL** and the **anon/public** key.
+
+Your `.env` should look like:
 
 ```ini
-# --- Database ---
-SUPABASE_DB_HOST=db.ijrqtnmlfbgufuqwbjet.supabase.co
+SUPABASE_DB_HOST=aws-0-ap-southeast-1.pooler.supabase.com
 SUPABASE_DB_PORT=5432
 SUPABASE_DB_NAME=postgres
-SUPABASE_DB_USER=student_yourname          # ← your individual DB role (e.g. student_amara)
-SUPABASE_DB_PASSWORD=<your individual password — provided by lecturer privately>
-SUPABASE_DB_SCHEMA=student_yourname        # ← must match your DB role name
+SUPABASE_DB_USER=postgres.abcdefghijklmn      # ← your project ref
+SUPABASE_DB_PASSWORD=your_database_password
+SUPABASE_DB_SCHEMA=public
 
-# --- Supabase API (for React frontend) ---
-VITE_SUPABASE_URL=https://ijrqtnmlfbgufuqwbjet.supabase.co
-VITE_SUPABASE_ANON_KEY=<provided by lecturer>
+VITE_SUPABASE_URL=https://abcdefghijklmn.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6...
 
-# --- JWT (for Module 04) ---
 JWT_SECRET=<generate one — see below>
 JWT_EXPIRY=3600
 ```
@@ -150,37 +144,39 @@ Copy the output (looks like `a3f9b2c1...`) and paste it as the value for `JWT_SE
 
 ## Step 4 — Run the Database Migrations
 
-Migrations are SQL files that create and configure your database tables. You run them once to set up your schema. They must be run in numbered order.
+Migrations are SQL files that create your database tables. You run them once to set up the schema. They must be run in numbered order.
 
-> **Important:** Always run migrations using `psql` from the command line as shown below. Do **not** use the Supabase SQL Editor for migrations — the SQL Editor uses a different default schema and your tables will end up in the wrong place.
+You will run these directly in the Supabase **SQL Editor** — no command-line tools needed.
 
-Set your connection string as an environment variable (replace `student_yourname` and `your_individual_password`):
+1. In your Supabase dashboard, click **SQL Editor** in the left sidebar → **New query**.
+2. Open `database/migrations/001_initial_schema.sql` in your code editor. Select all the content and copy it.
+3. Paste it into the SQL Editor query box. Click **Run**.
+4. You should see a success message with no errors.
+5. Repeat for `database/migrations/002_indexes.sql`: copy the full file content → paste → Run.
 
-```bash
-export PGPASSWORD='your_individual_password'
-export DB_URL="postgresql://student_yourname@db.ijrqtnmlfbgufuqwbjet.supabase.co:5432/postgres"
-```
+### Verify
 
-Then run the migrations in order:
+1. Go to **Table Editor** in your Supabase dashboard.
+2. You should see 6 tables in the `public` schema: `locations`, `patients`, `doctors`, `doctor_phones`, `referrals`, `users`.
 
-```bash
-psql "$DB_URL" -f database/migrations/001_initial_schema.sql
-psql "$DB_URL" -f database/migrations/002_indexes.sql
-```
-
-You should see output like `CREATE TABLE`, `CREATE INDEX` with no errors.
-
-### Verify in Supabase
-
-1. Go to the Supabase dashboard → **Table Editor**
-2. Select your schema from the dropdown (`student_yourname`)
-3. You should see 6 tables: `locations`, `patients`, `doctors`, `doctor_phones`, `referrals`, `users`
-
-If you see errors or the tables are missing, read the error message carefully and re-check your connection string and schema name.
+If you see an error like `relation "patients" already exists`, the migration has already been run — that's fine, just move on to Step 5.
 
 ---
 
 ## Step 5 — Start the PHP Backend
+
+**Windows only — enable the PostgreSQL driver first:**
+
+PHP on Windows does not enable the `pdo_pgsql` extension by default. Without it you will see `Connection failed: could not find driver`.
+
+1. Run `php --ini` in your terminal — it prints the path to your `php.ini` file.
+2. Open that file in a text editor (e.g. Notepad).
+3. Find the line `;extension=pdo_pgsql` — remove the leading `;` so it reads `extension=pdo_pgsql`.
+4. Save the file and close it.
+
+(macOS users: this extension is enabled automatically with `brew install php`.)
+
+---
 
 Run the PHP development server from the **project root** (not inside the `backend/` folder):
 
@@ -196,7 +192,11 @@ PHP 8.x.x Development Server (http://localhost:8000) started
 Keep this terminal open. Test it is connected to your database:
 
 ```bash
+# macOS / Linux / Git Bash:
 curl http://localhost:8000/api/patients
+
+# Windows PowerShell:
+Invoke-WebRequest -Uri http://localhost:8000/api/patients -UseBasicParsing
 ```
 
 Expected response (empty array is correct — no data yet):
@@ -233,10 +233,18 @@ You should see Vite start up and print a local URL. Open [http://localhost:5173]
 ## Step 7 — Verify Everything Works
 
 At this point you should have:
-- [x] Your schema exists in Supabase with 6 tables
-- [x] `.env` file configured with your credentials
+- [x] Your Supabase project created with 6 tables in the `public` schema
+- [x] `.env` file configured with your own project's pooler credentials
 - [x] PHP server running at `localhost:8000`
-- [x] `curl http://localhost:8000/api/patients` returns `{ "success": true, "data": [] }`
+- [x] API returns `{ "success": true, "data": [] }` for patients
+
+```bash
+# macOS / Linux / Git Bash:
+curl http://localhost:8000/api/patients
+
+# Windows PowerShell:
+Invoke-WebRequest -Uri http://localhost:8000/api/patients -UseBasicParsing
+```
 
 ---
 
@@ -394,9 +402,8 @@ Use this as a reference once you know the workflow. Each module builds on the pr
 git checkout -b module-01-normalisation
 # Read: docs/theory/module-01-normalisation.md
 # Task: database/migrations/001_initial_schema.sql + 002_indexes.sql
-psql "$DB_URL" -f database/migrations/001_initial_schema.sql
-psql "$DB_URL" -f database/migrations/002_indexes.sql
-# Verify: Supabase Table Editor → your schema → 6 tables
+# Run both files via Supabase SQL Editor (copy-paste each file → Run)
+# Verify: Supabase Table Editor → public schema → 6 tables
 ```
 
 ### Module 02 — PHP + PDO CRUD
@@ -405,10 +412,15 @@ git checkout -b module-02-php-crud
 # Read: docs/theory/module-02-php-pdo.md
 # Tasks: backend/routes/api.php + backend/controllers/PatientController.php
 php -S localhost:8000 -t backend/   # start server
+
+# macOS / Linux / Git Bash:
 curl http://localhost:8000/api/patients  # test GET
 curl -X POST http://localhost:8000/api/patients \
   -H "Content-Type: application/json" \
   -d '{"name":"Your Name","postalCode":"10100"}'  # test POST
+
+# Windows PowerShell:
+Invoke-WebRequest -Uri http://localhost:8000/api/patients -UseBasicParsing
 ```
 
 ### Module 03 — REST API Design
@@ -441,22 +453,25 @@ cd frontend && npm install && npm run dev
 
 ## Troubleshooting Common Issues
 
-### `psql: error: connection to server failed`
-- Check the `PGPASSWORD` environment variable is set to your individual password
-- Check that `SUPABASE_DB_USER` in your connection URL matches your assigned DB role (e.g. `student_amara`)
-- Check your internet connection (Supabase is a cloud database)
+### `Connection failed: could not find driver` (Windows)
+- The `pdo_pgsql` PHP extension is not enabled.
+- Run `php --ini`, open the listed `php.ini` file, find `;extension=pdo_pgsql`, remove the `;`, save, restart PHP server.
 
-### `FATAL: schema "student_yourname" does not exist`
-- You forgot to create the schema in Step 2, or the name doesn't match
-- Go back to Supabase SQL Editor and run `CREATE SCHEMA student_yourname;`
+### `Database connection failed` or `PDOException: could not connect`
+- Check `SUPABASE_DB_HOST`, `SUPABASE_DB_USER`, and `SUPABASE_DB_PASSWORD` in your `.env`.
+- The host must be the **session pooler** address (starts with `aws-0-`), not the direct DB host (`db.xxx.supabase.co`).
+- The user must be `postgres.YOUR_PROJECT_REF` — get this from Dashboard → Connect → Session pooler.
+- Make sure you saved your database password when you created the project. If you forgot it, reset it in Dashboard → Project Settings → Database.
+
+### `psql: command not found` or `psql is not recognized`
+- psql is not required for this course. Run migrations through the Supabase SQL Editor instead (Step 4).
 
 ### PHP server: `Failed to open stream: .env not found`
 - Your `.env` file is missing from the project root — run `cp docs/templates/env.example .env`
 - Make sure you run `php -S localhost:8000 -t backend/` from the **project root**, not from inside `backend/`
 
-### PHP server: `PDOException: could not connect to server`
-- Your `SUPABASE_DB_PASSWORD` in `.env` is wrong — double-check with your lecturer
-- Your `SUPABASE_DB_SCHEMA` must match the schema you created (`student_yourname`)
+### SQL Editor shows `relation "patients" already exists`
+- The migration has already been run in this project — this is fine. Check Table Editor to confirm the 6 tables are present, then move on.
 
 ### `curl` returns `{"success":false,"data":null,"message":"Failed to create patient"}`
 - Check the PHP server terminal for the actual error message
